@@ -297,8 +297,24 @@ tr:nth-child(even) td { background:var(--light); }
   <!-- ── CHALLENGE PANEL ── -->
   <div class="panel" id="panel-challenge">
     <div class="sec-head">Guided Challenges</div>
-    <p style="font-size:11px;color:var(--mid);margin-bottom:10px;line-height:1.5;">Each mission helps you learn something about forces and motion. Read the mission, then use the Explore tab to try it out. A hint will appear if you need help! 🎯</p>
+    <div style="background:#fff8f0;border:1.5px solid var(--orange);border-radius:10px;padding:10px 12px;margin-bottom:12px;">
+      <div style="font-size:11px;font-weight:700;color:var(--orange);margin-bottom:6px;">🎓 Class Level</div>
+      <div style="display:flex;gap:8px;">
+        <button id="lvl-btn-6" onclick="setLevel('6')" style="flex:1;padding:6px;border-radius:8px;border:2px solid var(--orange);background:var(--orange);color:#fff;font-weight:700;font-size:11px;cursor:pointer;">6th Grade</button>
+        <button id="lvl-btn-78" onclick="setLevel('78')" style="flex:1;padding:6px;border-radius:8px;border:2px solid var(--lgray);background:#fff;color:var(--mid);font-weight:700;font-size:11px;cursor:pointer;">7th / 8th Grade</button>
+      </div>
+    </div>
+    <p style="font-size:11px;color:var(--mid);margin-bottom:10px;line-height:1.5;">Do each activity, then answer the question! 🎯</p>
     <div id="challenge-list"></div>
+    <div id="ch-question-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
+      <div style="background:#fff;border-radius:16px;padding:24px;max-width:420px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,0.2);">
+        <div style="font-size:13px;font-weight:700;color:var(--orange);margin-bottom:6px;" id="ch-q-label">Challenge Question</div>
+        <div style="font-size:14px;font-weight:600;color:var(--dark);margin-bottom:14px;line-height:1.5;" id="ch-q-text"></div>
+        <div id="ch-q-options"></div>
+        <div id="ch-q-feedback" style="display:none;padding:10px;border-radius:8px;margin-top:10px;font-size:13px;font-weight:600;line-height:1.5;"></div>
+        <button id="ch-q-next" onclick="submitChallengeAnswer()" style="display:none;margin-top:12px;width:100%;padding:10px;background:var(--green);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">✅ Got it! Next →</button>
+      </div>
+    </div>
   </div>
 
   <!-- ── DATA PANEL ── -->
@@ -425,80 +441,260 @@ const SCENES = {
 };
 
 // ═══════════════════════════════════════════════════════════
-// CHALLENGES  — simplified for SpEd / checklist-aligned
 // ═══════════════════════════════════════════════════════════
-const CHALLENGES = [
-  {
-    id:'c1', title:'🏔 What Forces Do You See?', scene:'ramp', completed:false, completedAt:null,
-    desc:'The box starts at the TOP of the ramp and slides DOWN. Watch the force arrows — one pulls DOWN (gravity) and one pushes back UP the ramp (friction).',
-    goal:'✅ Goal: Make sure Force Arrows are ON, then watch the box slide down at least halfway.',
-    hint:'💡 Hint: The orange arrow = gravity pulling the box DOWN. The purple arrow = friction pushing back UP the ramp. Both are working on the box!',
-    check: ()=> scene==='ramp' && showVectors && (sim.dist!==undefined) && sim.dist < ((p5inst.width*.75-36)/SCALE)*0.6,
-    concept:'Great job! Two forces are acting on the box: GRAVITY pulls it down the ramp, and FRICTION pushes back against the motion. You can identify the forces on an object! ✅'
-  },
-  {
-    id:'c2', title:'⬆ Steeper Ramp = Faster?', scene:'ramp', completed:false, completedAt:null,
-    desc:'Make the ramp steeper and watch what happens to the speed. Move the "Steepness of Ramp" slider from LOW to HIGH.',
-    goal:'✅ Goal: Slide the angle past 55° and watch the box slide down. Does it reach the bottom faster?',
-    hint:'💡 Hint: A steeper ramp means gravity is pulling harder along the slope. Watch the Speed number — does it go up higher?',
-    check: ()=> scene==='ramp' && P.angle>=55 && (sim.dist!==undefined) && sim.dist < ((p5inst.width*.75-36)/SCALE)*0.5,
-    concept:'The steeper the ramp, the FASTER the box moves! A bigger force (gravity pulling down the slope) causes the object to speed up more. Force changes motion! ✅'
-  },
-  {
-    id:'c3', title:'📦 Push the Box!', scene:'friction', completed:false, completedAt:null,
-    desc:'The box starts on the LEFT side. Slide the "Your Push Force" slider from LOW to HIGH. At first the box stays still — then it starts sliding to the RIGHT!',
-    goal:'✅ Goal: Get the box moving to the RIGHT and let it travel at least half a meter.',
-    hint:'💡 Hint: Start the slider at 0 and slowly increase it. Friction is holding the box still. Keep increasing your push until the box moves right!',
-    check: ()=> scene==='friction' && (sim.vx||0)>0.1 && (sim.x||0)>0.5,
-    concept:'Friction was stopping the box. When your push force got bigger than friction, the box started moving to the right. An unbalanced force changes motion! ✅'
-  },
-  {
-    id:'c4', title:'⚖ Balanced = No Moving', scene:'friction', completed:false, completedAt:null,
-    desc:'Press ↺ Reset first. The box sits still on the LEFT. Now slowly increase the push force — but stop BEFORE the box moves right. The forces are BALANCED!',
-    goal:'✅ Goal: Apply at least 20N of push force while the box is still NOT moving.',
-    hint:'💡 Hint: When the box is NOT moving, your push and friction are equal and opposite — they balance out. The net force = 0 so nothing moves!',
-    check: ()=> scene==='friction' && (sim.vx||0)<0.01 && P.applied>=20 && P.applied < P.muStatic*P.mass*P.gravity,
-    concept:'When forces are balanced, objects do NOT move. Your push and friction canceled each other out — the net force was zero, so motion did not change! ✅'
-  },
-  {
-    id:'c5', title:'💥 Watch a Collision!', scene:'collision', completed:false, completedAt:null,
-    desc:'The orange ball moves RIGHT →  and the blue ball moves LEFT ←. Press Play and watch them crash in the middle. Both balls will change direction or speed!',
-    goal:'✅ Goal: Watch the collision happen, then press 📊 Save to Data Table to record what happened.',
-    hint:'💡 Hint: Before they hit: orange goes right, blue goes left. After they hit, watch what direction each one goes. Then press Save!',
-    check: ()=> scene==='collision' && sim.collided && dataRows.filter(r=>r.scene==='collision').length>=1,
-    concept:'The collision is a FORCE between the two balls. That force changed their motion — they slowed down, sped up, or changed direction. Forces always change motion! ✅'
-  },
-  {
-    id:'c6', title:'🌍 Gravity Pulls Everything', scene:'projectile', completed:false, completedAt:null,
-    desc:'The ball launches from the BOTTOM LEFT and flies UP and to the RIGHT — then gravity pulls it back DOWN and it lands on the ground.',
-    goal:'✅ Goal: Press Launch, watch it fly and land, then press 📊 Save to Data Table.',
-    hint:'💡 Hint: Without gravity, the ball would fly in a straight line forever. Gravity pulls it DOWN the whole time — that\'s why it curves and lands!',
-    check: ()=> scene==='projectile' && sim.landed && dataRows.filter(r=>r.scene==='projectile').length>=1,
-    concept:'Gravity is always pulling DOWN on everything. That\'s why the ball curved and landed. Gravity is a force that changes the motion of the ball! ✅'
-  },
-  {
-    id:'c7', title:'🧊 Smooth vs. Rough', scene:'friction', completed:false, completedAt:null,
-    desc:'Try LOW roughness (near 0 = like ice, box slides far to the RIGHT easily) AND HIGH roughness (near 0.7 = sandpaper, box barely moves right). Save both!',
-    goal:'✅ Goal: Save one run with LOW friction AND one run with HIGH friction to the Data Table.',
-    hint:'💡 Hint: Set friction near 0, run it and save. Then reset, set friction near 0.7, run it and save. Check the Data tab to compare how far it went!',
-    check: ()=> {
-      let fRows = dataRows.filter(r=>r.scene==='friction');
-      return fRows.some(r=>+r.data[1]<=0.15) && fRows.some(r=>+r.data[1]>=0.45);
+// CLASS LEVEL & CHALLENGES
+// ═══════════════════════════════════════════════════════════
+let classLevel = '6'; // '6' or '78'
+let pendingChallengeIdx = -1;
+let challengeAnswers = {}; // store student answers
+
+function setLevel(lvl) {
+  classLevel = lvl;
+  document.getElementById('lvl-btn-6').style.background = lvl==='6' ? 'var(--orange)' : '#fff';
+  document.getElementById('lvl-btn-6').style.color = lvl==='6' ? '#fff' : 'var(--mid)';
+  document.getElementById('lvl-btn-6').style.borderColor = lvl==='6' ? 'var(--orange)' : 'var(--lgray)';
+  document.getElementById('lvl-btn-78').style.background = lvl==='78' ? 'var(--orange)' : '#fff';
+  document.getElementById('lvl-btn-78').style.color = lvl==='78' ? '#fff' : 'var(--mid)';
+  document.getElementById('lvl-btn-78').style.borderColor = lvl==='78' ? 'var(--orange)' : 'var(--lgray)';
+  // Reset completions when switching levels
+  ALL_CHALLENGES['6'].forEach(c=>{ c.completed=false; c.completedAt=null; c.answer=null; });
+  ALL_CHALLENGES['78'].forEach(c=>{ c.completed=false; c.completedAt=null; c.answer=null; });
+  activeChallengeIdx = -1;
+  renderChallenges();
+}
+
+function getCHALLENGES() { return ALL_CHALLENGES[classLevel]; }
+
+const ALL_CHALLENGES = {
+  '6': [
+    {
+      id:'c1', title:'🔬 Turn On the Force Arrows', scene:'ramp', completed:false, completedAt:null, answer:null,
+      desc:'Look at the ramp. The box is at the top! Find the button that says "Show Force Arrows" and turn it ON. You will see colored arrows appear on the box.',
+      goal:'✅ Turn on Force Arrows, then press Play to watch the box slide down.',
+      hint:'💡 Hint: Look for the "Show Force Arrows" button in the Explore panel. Click it so it turns ON.',
+      check: ()=> scene==='ramp' && showVectors,
+      question: {
+        type: 'mc',
+        text: 'You can see arrows on the box. What do you think the arrows show?',
+        options: ['How heavy the box is', 'The forces pushing and pulling the box', 'The color of the box', 'How fast the box is going'],
+        correct: 1,
+        feedback: '✅ Yes! The arrows show FORCES — the pushes and pulls acting on the box. One arrow shows gravity pulling down, another shows friction pushing back!'
+      }
     },
-    concept:'Friction is a force! Rough surfaces create MORE friction, which slows objects down faster. Smooth surfaces have LESS friction, so objects keep moving longer. ✅'
-  },
-  {
-    id:'c8', title:'📊 Save Your Observations!', scene:'ramp', completed:false, completedAt:null,
-    desc:'Run the ramp at a LOW angle, then save. Change to a MEDIUM angle, save. Then try a HIGH angle and save. Look at your data!',
-    goal:'✅ Goal: Save at least 3 ramp runs at 3 DIFFERENT angles to the Data Table.',
-    hint:'💡 Hint: Press ↺ Reset between each trial. Change the angle, press Play, wait a few seconds, then press 📊 Save to Data Table. Do this 3 times!',
-    check: ()=> {
-      let rRows = dataRows.filter(r=>r.scene==='ramp');
-      return [...new Set(rRows.map(r=>r.data[0]))].length >= 3;
+    {
+      id:'c2', title:'📐 Make the Ramp Steeper', scene:'ramp', completed:false, completedAt:null, answer:null,
+      desc:'Find the "Steepness of Ramp" slider. Drag it all the way to the right to make the ramp really steep. Then press Play and watch the box slide down.',
+      goal:'✅ Move the angle slider past 60° and press Play to watch the box.',
+      hint:'💡 Hint: The steepness slider is in the Explore panel. Drag it to the right — the number should go above 60.',
+      check: ()=> scene==='ramp' && P.angle>=60,
+      question: {
+        type: 'mc',
+        text: 'When you made the ramp steeper, what happened to the box?',
+        options: ['It moved slower', 'It moved faster', 'It stayed still', 'It floated up'],
+        correct: 1,
+        feedback: '✅ It moved faster! A steeper ramp means gravity pulls harder along the slope. More force = faster movement!'
+      }
     },
-    concept:'You recorded evidence from the activity! Scientists save data to find patterns. You used evidence to show how the ramp angle changes the speed of the object! ✅'
-  }
-];
+    {
+      id:'c3', title:'📦 Push the Box!', scene:'friction', completed:false, completedAt:null, answer:null,
+      desc:'Find the "Your Push Force" slider. Start at 0 and slowly drag it to the right. At first nothing happens — keep going until the box starts sliding!',
+      goal:'✅ Get the box moving by increasing the push force slider.',
+      hint:'💡 Hint: The push force slider needs to be big enough to beat friction. Keep dragging it to the right until the box moves!',
+      check: ()=> scene==='friction' && (sim.vx||0)>0.1,
+      question: {
+        type: 'mc',
+        text: 'Why did the box stay still at first when you pushed?',
+        options: ['The box was too heavy to see', 'Friction was holding it in place', 'You did not push hard enough to turn it on', 'The ramp was in the way'],
+        correct: 1,
+        feedback: '✅ Friction was holding it! Friction is a force that resists motion. Your push had to be bigger than friction to get the box moving.'
+      }
+    },
+    {
+      id:'c4', title:'💥 Watch a Collision!', scene:'collision', completed:false, completedAt:null, answer:null,
+      desc:'Look at the two balls. The orange ball will move RIGHT and the blue ball will move LEFT. Press Play and watch them crash into each other!',
+      goal:'✅ Press Play and watch the two balls collide.',
+      hint:'💡 Hint: Just press the Play button! Watch what happens when the two balls hit each other.',
+      check: ()=> scene==='collision' && sim.collided,
+      question: {
+        type: 'mc',
+        text: 'After the balls crashed, what happened to them?',
+        options: ['They disappeared', 'They kept going in the same direction', 'They changed speed or direction', 'Nothing happened'],
+        correct: 2,
+        feedback: '✅ They changed! When the balls hit each other, the force of the collision changed how they were moving. Forces always change motion!'
+      }
+    },
+    {
+      id:'c5', title:'🌍 Watch Gravity Work!', scene:'projectile', completed:false, completedAt:null, answer:null,
+      desc:'Look at the projectile launcher. Press Play and watch the ball fly through the air. Notice how it goes UP at first, then curves DOWN.',
+      goal:'✅ Press Play and watch the ball launch and land.',
+      hint:'💡 Hint: Just press the Play button and watch the whole path of the ball from launch to landing.',
+      check: ()=> scene==='projectile' && sim.landed,
+      question: {
+        type: 'mc',
+        text: 'Why did the ball curve DOWN and land on the ground?',
+        options: ['The ball got tired', 'Gravity pulled it down the whole time', 'The wind pushed it down', 'The ball was too heavy to fly'],
+        correct: 1,
+        feedback: '✅ Gravity! Gravity is always pulling everything DOWN toward Earth. Even while the ball was flying forward, gravity kept pulling it down until it landed.'
+      }
+    },
+    {
+      id:'c6', title:'🧊 Try Icy vs. Rough Surface', scene:'friction', completed:false, completedAt:null, answer:null,
+      desc:'Find the "Surface Roughness" slider. First drag it all the way LEFT (very smooth, like ice). Press Play. Then reset and drag it all the way RIGHT (very rough). Press Play again.',
+      goal:'✅ Try the smooth surface AND the rough surface — press Play for both.',
+      hint:'💡 Hint: Try roughness near 0 first (smooth). Watch how far the box slides. Then try roughness near 0.7 (rough). Does it slide as far?',
+      check: ()=> scene==='friction' && P.muKinetic !== undefined,
+      question: {
+        type: 'short',
+        text: 'Which surface made the box slide farther — the smooth one or the rough one? Why do you think that is?',
+        feedback: '✅ Great thinking! The smooth surface has less friction, so the box slides farther. The rough surface has more friction, which slows the box down faster.'
+      }
+    },
+    {
+      id:'c7', title:'📊 Save Your Data!', scene:'ramp', completed:false, completedAt:null, answer:null,
+      desc:'Set the ramp to a LOW angle (about 20°). Press Play and watch the box slide. Then press the "📊 Save to Data Table" button. Now try a HIGH angle (about 60°) and save again!',
+      goal:'✅ Save 2 ramp runs at different angles to the Data Table.',
+      hint:'💡 Hint: After pressing Play and watching the box, look for the green "📊 Save to Data Table" button and click it. Do this twice with different angles!',
+      check: ()=> { let r=dataRows.filter(r=>r.scene==='ramp'); return r.length>=2; },
+      question: {
+        type: 'mc',
+        text: 'Why do scientists save their data?',
+        options: ['To make the experiment look fancy', 'To remember what happened and compare results', 'Because the teacher said so', 'Data does not matter'],
+        correct: 1,
+        feedback: '✅ Scientists save data to remember and compare! You can now look at your Data tab and see how the angle changed the speed. That is real science!'
+      }
+    },
+    {
+      id:'c8', title:'⚖️ Balanced Forces — No Movement', scene:'friction', completed:false, completedAt:null, answer:null,
+      desc:'Press Reset. Now slowly increase the "Your Push Force" slider — but STOP as soon as the box starts to move. When the box is still, your push and friction are BALANCED!',
+      goal:'✅ Get the push force above 10N while the box is still NOT moving.',
+      hint:'💡 Hint: Increase the push slider slowly. Stop before the box slides. Look at the force arrows — they should be equal and pointing opposite directions!',
+      check: ()=> scene==='friction' && (sim.vx||0)<0.01 && P.applied>=10,
+      question: {
+        type: 'mc',
+        text: 'When the box was NOT moving even though you were pushing it, what were the forces doing?',
+        options: ['There were no forces', 'The forces were balanced — equal and opposite', 'Gravity disappeared', 'The box was broken'],
+        correct: 1,
+        feedback: '✅ Balanced forces! Your push and friction were equal and opposite, so they canceled out. When forces balance, objects do NOT move or change their motion.'
+      }
+    }
+  ],
+
+  '78': [
+    {
+      id:'c1', title:'🔬 Identify the Forces', scene:'ramp', completed:false, completedAt:null, answer:null,
+      desc:'Turn on Force Arrows, then press Play and watch the box slide down the ramp. Look at each arrow — one shows gravity, one shows friction, one shows the net force.',
+      goal:'✅ Turn on Force Arrows and watch the box slide all the way down.',
+      hint:'💡 Hint: The orange arrow is gravity (down the ramp). The purple arrow is friction (up the ramp, opposing motion). The red arrow is the NET force.',
+      check: ()=> scene==='ramp' && showVectors && (sim.dist!==undefined) && sim.dist < ((p5inst.width*.75-36)/SCALE)*0.6,
+      question: {
+        type: 'mc',
+        text: 'The net force arrow points DOWN the ramp. What does that tell you about the forces?',
+        options: ['Gravity and friction are equal', 'Gravity is stronger than friction, so the box accelerates down', 'Friction is stronger than gravity', 'The forces are balanced'],
+        correct: 1,
+        feedback: '✅ Gravity is winning! The net force points in the direction of the larger force. Since gravity > friction here, the net force pulls the box down the ramp — causing acceleration.'
+      }
+    },
+    {
+      id:'c2', title:'📐 Angle vs. Acceleration', scene:'ramp', completed:false, completedAt:null, answer:null,
+      desc:'Try the ramp at 25°, watch the box, then try it at 55°. Watch the Speed readout — notice how much faster the box moves on the steeper ramp.',
+      goal:'✅ Run the ramp at an angle below 30°, then run it above 50°. Compare the speeds.',
+      hint:'💡 Hint: On a steeper ramp, gravity has a larger component along the slope. F = ma — more force means more acceleration!',
+      check: ()=> scene==='ramp' && P.angle>=50,
+      question: {
+        type: 'short',
+        text: 'Using F = ma, explain why a steeper ramp makes the box accelerate faster.',
+        feedback: '✅ On a steeper ramp, the component of gravity along the slope is larger. That means more net force. Since F = ma and mass stays the same, more force = more acceleration!'
+      }
+    },
+    {
+      id:'c3', title:'📦 Static vs. Kinetic Friction', scene:'friction', completed:false, completedAt:null, answer:null,
+      desc:'Slowly increase the push force slider from 0. Notice the box stays still for a while (static friction). Keep going until it suddenly starts moving — that moment is when you overcame static friction!',
+      goal:'✅ Observe the box staying still, then get it moving by overcoming static friction.',
+      hint:'💡 Hint: Static friction (box still) is stronger than kinetic friction (box moving). Watch the force arrows — they balance until you apply enough force!',
+      check: ()=> scene==='friction' && (sim.vx||0)>0.1 && (sim.x||0)>0.3,
+      question: {
+        type: 'mc',
+        text: 'Why does it take more force to START the box moving than to KEEP it moving?',
+        options: ['The box gets lighter when moving', 'Static friction is greater than kinetic friction', 'Gravity turns off when the box moves', 'The surface gets smoother when the box slides'],
+        correct: 1,
+        feedback: '✅ Static friction > kinetic friction! It takes more force to break an object free from rest than to keep it sliding. Once moving, friction drops to a lower kinetic value.'
+      }
+    },
+    {
+      id:'c4', title:'💥 Conservation of Momentum', scene:'collision', completed:false, completedAt:null, answer:null,
+      desc:'Watch the collision. Press Play, then save the data. Now change the mass of one ball (use the sliders) and watch again. How does changing mass affect what happens after the collision?',
+      goal:'✅ Watch a collision, save data, then change a mass and watch again.',
+      hint:'💡 Hint: momentum = mass × velocity. In a collision, total momentum is conserved. A heavier ball has more momentum — watch what happens to the lighter one!',
+      check: ()=> scene==='collision' && sim.collided && dataRows.filter(r=>r.scene==='collision').length>=1,
+      question: {
+        type: 'short',
+        text: 'What happened when you made one ball much heavier than the other? Describe how their motion changed after the collision.',
+        feedback: '✅ The heavier ball barely slows down while the lighter ball bounces away fast. This shows conservation of momentum — the heavier ball has more momentum and transfers force to the lighter one.'
+      }
+    },
+    {
+      id:'c5', title:'🌍 Projectile Motion & Gravity', scene:'projectile', completed:false, completedAt:null, answer:null,
+      desc:'Launch the ball and save the data. Then change the launch angle and launch again. Notice how the angle changes the path shape and landing distance.',
+      goal:'✅ Launch at two different angles and save both runs to the data table.',
+      hint:'💡 Hint: Horizontal motion is constant (no air resistance). Vertical motion is controlled entirely by gravity. The two are independent of each other!',
+      check: ()=> scene==='projectile' && sim.landed && dataRows.filter(r=>r.scene==='projectile').length>=1,
+      question: {
+        type: 'mc',
+        text: 'While the ball is in the air, what is the only force acting on it (ignoring air resistance)?',
+        options: ['The launch force keeps pushing it forward', 'Only gravity, pulling it down', 'Friction from the air slows it sideways', 'Both gravity and the launch force'],
+        correct: 1,
+        feedback: '✅ Only gravity! Once launched, no force acts horizontally (ignoring air resistance). Gravity pulls it down the whole time, creating the curved parabolic path.'
+      }
+    },
+    {
+      id:'c6', title:'🧊 Friction Investigation', scene:'friction', completed:false, completedAt:null, answer:null,
+      desc:'Run 3 trials: LOW roughness (~0.1), MEDIUM roughness (~0.35), HIGH roughness (~0.65). Save each one. Look at your data — how does friction affect distance traveled?',
+      goal:'✅ Save 3 friction runs with different roughness values to the Data Table.',
+      hint:'💡 Hint: Use the Surface Roughness slider. After each run, save before resetting. Check the Data tab to compare how far the box went each time.',
+      check: ()=> {
+        let fRows = dataRows.filter(r=>r.scene==='friction');
+        return fRows.length >= 3;
+      },
+      question: {
+        type: 'short',
+        text: 'Based on your 3 data points, describe the relationship between surface roughness and how far the box travels.',
+        feedback: '✅ As roughness increases, friction increases, which does more negative work on the box — removing kinetic energy faster and causing it to stop sooner. Inverse relationship!'
+      }
+    },
+    {
+      id:'c7', title:'📊 Ramp Data Analysis', scene:'ramp', completed:false, completedAt:null, answer:null,
+      desc:'Save ramp data at 3 different angles (try 20°, 40°, and 60°). Go to the Data tab and look at the speed values. What pattern do you see?',
+      goal:'✅ Save 3 ramp runs at 3 different angles.',
+      hint:'💡 Hint: Press Reset between each trial. Adjust angle, press Play, let it run a few seconds, then save. Check your Data tab after all 3!',
+      check: ()=> {
+        let rRows = dataRows.filter(r=>r.scene==='ramp');
+        return [...new Set(rRows.map(r=>r.data[0]))].length >= 3;
+      },
+      question: {
+        type: 'short',
+        text: 'Look at your data table. As angle increases, what happens to speed? Write a claim using evidence from your data.',
+        feedback: '✅ As the ramp angle increases, speed increases. Evidence: higher angle trials show higher speed values. Claim: Steeper ramps produce greater acceleration because gravity\'s component along the slope increases.'
+      }
+    },
+    {
+      id:'c8', title:'⚖️ Net Force = Zero', scene:'friction', completed:false, completedAt:null, answer:null,
+      desc:'Press Reset. Increase the push force until it is just below the point where the box moves. The box should be still with a significant push applied. This is equilibrium!',
+      goal:'✅ Apply at least 20N of push force while the box remains completely still.',
+      hint:'💡 Hint: For the box to stay still: push force = static friction force. Net force = 0. Watch the force arrows — they should be equal and opposite!',
+      check: ()=> scene==='friction' && (sim.vx||0)<0.01 && P.applied>=20 && P.applied < P.muStatic*P.mass*P.gravity,
+      question: {
+        type: 'mc',
+        text: 'You applied 20N of push force and the box did NOT move. What must be true about the friction force?',
+        options: ['Friction = 0N (no friction)', 'Friction = 20N (equal and opposite to your push)', 'Friction = 10N (half your push)', 'Friction > 20N (stronger than your push)'],
+        correct: 1,
+        feedback: '✅ Friction = 20N! For the box to remain in equilibrium (not accelerate), net force must = 0. That means friction exactly equals your push — equal magnitude, opposite direction.'
+      }
+    }
+  ]
+};
+
+// Make CHALLENGES point to current level's array
+let CHALLENGES = ALL_CHALLENGES['6'];
 
 // ═══════════════════════════════════════════════════════════
 // QUIZ QUESTIONS — simplified / checklist-aligned
@@ -1165,6 +1361,7 @@ function clearDataTable() {
 // CHALLENGES
 // ═══════════════════════════════════════════════════════════
 function renderChallenges() {
+  CHALLENGES = ALL_CHALLENGES[classLevel];
   let list=document.getElementById('challenge-list'); list.innerHTML='';
   CHALLENGES.forEach((ch,i)=>{
     let cls='challenge-card'+(activeChallengeIdx===i?' active':'')+(ch.completed?' completed':'');
@@ -1201,30 +1398,98 @@ function selectChallenge(i) {
 
 function checkChallengeCompletion() {
   if (activeChallengeIdx<0) return;
+  CHALLENGES = ALL_CHALLENGES[classLevel];
   let ch=CHALLENGES[activeChallengeIdx];
   if (!ch.completed && ch.check()) {
-    ch.completed=true;
-    ch.completedAt=new Date().toLocaleTimeString();
-    // Flash success
-    let f=document.getElementById('success-flash');
-    f.textContent='🎉 Challenge Complete!\n'+ch.concept;
-    f.style.maxWidth='420px'; f.style.fontSize='12px'; f.style.lineHeight='1.6';
-    f.classList.add('show');
-    setTimeout(()=>f.classList.remove('show'),4500);
-    // Update banner
-    document.getElementById('challenge-banner').className='show cb-complete';
-    document.getElementById('cb-title').textContent='✅ Challenge Complete!';
-    document.getElementById('cb-text').textContent=ch.concept;
-    document.getElementById('cb-goal').textContent='';
-    renderChallenges();
-    activeChallengeIdx=-1;
+    // Don't mark complete yet — show question first
+    pendingChallengeIdx = activeChallengeIdx;
+    showChallengeQuestion(ch);
   }
+}
+
+function showChallengeQuestion(ch) {
+  let modal = document.getElementById('ch-question-modal');
+  let qtext = document.getElementById('ch-q-text');
+  let opts = document.getElementById('ch-q-options');
+  let feedback = document.getElementById('ch-q-feedback');
+  let nextBtn = document.getElementById('ch-q-next');
+  let label = document.getElementById('ch-q-label');
+
+  label.textContent = '🎉 Activity done! Now answer this:';
+  qtext.textContent = ch.question.text;
+  feedback.style.display = 'none';
+  nextBtn.style.display = 'none';
+  opts.innerHTML = '';
+
+  if (ch.question.type === 'mc') {
+    ch.question.options.forEach((opt, i) => {
+      let btn = document.createElement('button');
+      btn.textContent = opt;
+      btn.style.cssText = 'display:block;width:100%;text-align:left;padding:10px 12px;margin-bottom:8px;border-radius:10px;border:1.5px solid var(--lgray);background:#fff;font-size:13px;cursor:pointer;font-family:Poppins,sans-serif;';
+      btn.onclick = () => {
+        // Clear selections
+        opts.querySelectorAll('button').forEach(b => {
+          b.style.background = '#fff'; b.style.borderColor = 'var(--lgray)'; b.style.color = 'var(--dark)';
+        });
+        btn.style.background = 'var(--orange)'; btn.style.borderColor = 'var(--orange)'; btn.style.color = '#fff';
+        ch.answer = opt;
+        feedback.style.display = 'block';
+        feedback.style.background = i===ch.question.correct ? '#f0faf0' : '#fff8f0';
+        feedback.style.color = i===ch.question.correct ? '#2e7d52' : '#c0680a';
+        feedback.textContent = ch.question.feedback;
+        nextBtn.style.display = 'block';
+      };
+      opts.appendChild(btn);
+    });
+  } else {
+    // short answer
+    let ta = document.createElement('textarea');
+    ta.placeholder = 'Type your answer here...';
+    ta.style.cssText = 'width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--lgray);font-size:13px;font-family:Poppins,sans-serif;min-height:80px;box-sizing:border-box;resize:vertical;';
+    ta.oninput = () => {
+      ch.answer = ta.value;
+      if (ta.value.trim().length > 3) {
+        feedback.style.display = 'block';
+        feedback.style.background = '#f0faf0';
+        feedback.style.color = '#2e7d52';
+        feedback.textContent = ch.question.feedback;
+        nextBtn.style.display = 'block';
+      }
+    };
+    opts.appendChild(ta);
+  }
+
+  modal.style.display = 'flex';
+}
+
+function submitChallengeAnswer() {
+  let modal = document.getElementById('ch-question-modal');
+  modal.style.display = 'none';
+  CHALLENGES = ALL_CHALLENGES[classLevel];
+  let ch = CHALLENGES[pendingChallengeIdx];
+  ch.completed = true;
+  ch.completedAt = new Date().toLocaleTimeString();
+  // Flash success
+  let f=document.getElementById('success-flash');
+  f.textContent='🎉 Challenge Complete!';
+  f.style.maxWidth='420px'; f.style.fontSize='13px'; f.style.lineHeight='1.6';
+  f.classList.add('show');
+  setTimeout(()=>f.classList.remove('show'),3000);
+  // Update banner
+  document.getElementById('challenge-banner').className='show cb-complete';
+  document.getElementById('cb-title').textContent='✅ Challenge Complete!';
+  document.getElementById('cb-text').textContent='Great work! Pick the next challenge.';
+  document.getElementById('cb-goal').textContent='';
+  renderChallenges();
+  activeChallengeIdx=-1;
+  pendingChallengeIdx=-1;
 }
 
 // ═══════════════════════════════════════════════════════════
 // DOWNLOAD SUMMARY
 // ═══════════════════════════════════════════════════════════
 function downloadSummary() {
+  CHALLENGES = ALL_CHALLENGES[classLevel];
   let completed = CHALLENGES.filter(c=>c.completed).length;
   let total = CHALLENGES.length;
   let date = new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
@@ -1236,6 +1501,7 @@ function downloadSummary() {
   lines.push('='.repeat(58));
   lines.push('');
   lines.push('  Student Name : ' + (studentName||'Unknown'));
+  lines.push('  Class Level  : ' + (classLevel==='6' ? '6th Grade' : '7th/8th Grade'));
   lines.push('  Date         : ' + date);
   lines.push('  Time         : ' + time);
   lines.push('  Session Start: ' + (sessionStart ? sessionStart.toLocaleTimeString() : '—'));
@@ -1249,8 +1515,8 @@ function downloadSummary() {
     lines.push('');
     lines.push('  ' + (i+1) + '. ' + ch.title);
     lines.push('     Status : ' + status + when);
-    if (ch.completed) {
-      lines.push('     Result : ' + ch.concept.replace(/✅/g,'').trim().substring(0,80));
+    if (ch.answer) {
+      lines.push('     Answer : ' + ch.answer);
     }
   });
 
@@ -1322,6 +1588,7 @@ function submitToSheets() {
   btn.disabled = true;
   btn.textContent = '⏳ Submitting…';
 
+  CHALLENGES = ALL_CHALLENGES[classLevel];
   let completed = CHALLENGES.filter(c => c.completed).length;
   let pct = quizState.total > 0 ? Math.round(quizState.correct / quizState.total * 100) : 0;
 
@@ -1334,12 +1601,14 @@ function submitToSheets() {
     quizTotal:      quizState.total,
     quizPct:        pct + '%',
     dataRowCount:   dataRows.length,
+    classLevel:     classLevel === '6' ? '6th Grade' : '7th/8th Grade',
     teacherEmail:   TEACHER_EMAIL,
   };
 
-  // One column per challenge: ✅ or ❌
+  // One column per challenge: ✅/❌ + answer
   CHALLENGES.forEach((ch, i) => {
     payload['c' + (i+1) + '_' + ch.title.replace(/[^a-zA-Z0-9]/g,' ').trim().substring(0,20)] = ch.completed ? '✅' : '❌';
+    if (ch.answer) payload['c' + (i+1) + '_answer'] = ch.answer;
   });
 
   let params = new URLSearchParams(payload).toString();
@@ -1423,7 +1692,11 @@ function updateQScore() {
 // ═══════════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════════
-window.addEventListener('load',()=>new p5(sketch));
+window.addEventListener('load',()=>{
+  new p5(sketch);
+  // init level buttons
+  setLevel('6');
+});
 </script>
 </body>
 </html>
