@@ -306,15 +306,6 @@ tr:nth-child(even) td { background:var(--light); }
     </div>
     <p style="font-size:11px;color:var(--mid);margin-bottom:10px;line-height:1.5;">Do each activity, then answer the question! 🎯</p>
     <div id="challenge-list"></div>
-    <div id="ch-question-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
-      <div style="background:#fff;border-radius:16px;padding:24px;max-width:420px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,0.2);">
-        <div style="font-size:13px;font-weight:700;color:var(--orange);margin-bottom:6px;" id="ch-q-label">Challenge Question</div>
-        <div style="font-size:14px;font-weight:600;color:var(--dark);margin-bottom:14px;line-height:1.5;" id="ch-q-text"></div>
-        <div id="ch-q-options"></div>
-        <div id="ch-q-feedback" style="display:none;padding:10px;border-radius:8px;margin-top:10px;font-size:13px;font-weight:600;line-height:1.5;"></div>
-        <button id="ch-q-next" onclick="submitChallengeAnswer()" style="display:none;margin-top:12px;width:100%;padding:10px;background:var(--green);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">✅ Got it! Next →</button>
-      </div>
-    </div>
   </div>
 
   <!-- ── DATA PANEL ── -->
@@ -1701,5 +1692,14 @@ window.addEventListener('load',()=>{
   setLevel('6');
 });
 </script>
+<div id="ch-question-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.55);z-index:99999;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:16px;padding:24px;max-width:420px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,0.25);position:relative;">
+    <div style="font-size:13px;font-weight:700;color:#e8503a;margin-bottom:6px;" id="ch-q-label">Challenge Question</div>
+    <div style="font-size:15px;font-weight:600;color:#2d2d2d;margin-bottom:14px;line-height:1.5;" id="ch-q-text"></div>
+    <div id="ch-q-options"></div>
+    <div id="ch-q-feedback" style="display:none;padding:10px;border-radius:8px;margin-top:10px;font-size:13px;font-weight:600;line-height:1.5;"></div>
+    <button id="ch-q-next" onclick="submitChallengeAnswer()" style="display:none;margin-top:12px;width:100%;padding:10px;background:#2e7d52;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">✅ Got it! Next →</button>
+  </div>
+</div>
 </body>
 </html>
