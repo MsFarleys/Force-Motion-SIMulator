@@ -1441,15 +1441,19 @@ function handleShortAnswer(ta) {
 
 function selectMCAnswer(idx) {
   let correct = window._chCorrect;
+  let isCorrect = (idx === correct);
   for (let i = 0; i < window._chOpts.length; i++) {
     let b = document.getElementById('mc-opt-' + i);
     if (!b) continue;
-    if (i === correct) {
-      // Always show correct answer green
+    if (i === idx && isCorrect) {
+      // Clicked the right answer — green
       b.style.background = '#2e7d52'; b.style.borderColor = '#2e7d52'; b.style.color = '#fff';
-    } else if (i === idx) {
-      // Wrong answer chosen — show red
-      b.style.background = '#e8503a'; b.style.borderColor = '#e8503a'; b.style.color = '#fff';
+    } else if (i === idx && !isCorrect) {
+      // Clicked wrong answer — red
+      b.style.background = '#c0392b'; b.style.borderColor = '#c0392b'; b.style.color = '#fff';
+    } else if (i === correct && !isCorrect) {
+      // Show the correct answer in green only if student got it wrong
+      b.style.background = '#2e7d52'; b.style.borderColor = '#2e7d52'; b.style.color = '#fff';
     } else {
       b.style.background = '#fff'; b.style.borderColor = '#ddd'; b.style.color = '#aaa';
     }
