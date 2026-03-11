@@ -1440,18 +1440,26 @@ function handleShortAnswer(ta) {
 }
 
 function selectMCAnswer(idx) {
+  let correct = window._chCorrect;
   for (let i = 0; i < window._chOpts.length; i++) {
     let b = document.getElementById('mc-opt-' + i);
-    if (b) { b.style.background='#fff'; b.style.borderColor='#ddd'; b.style.color='#2d2d2d'; }
+    if (!b) continue;
+    if (i === correct) {
+      // Always show correct answer green
+      b.style.background = '#2e7d52'; b.style.borderColor = '#2e7d52'; b.style.color = '#fff';
+    } else if (i === idx) {
+      // Wrong answer chosen — show red
+      b.style.background = '#e8503a'; b.style.borderColor = '#e8503a'; b.style.color = '#fff';
+    } else {
+      b.style.background = '#fff'; b.style.borderColor = '#ddd'; b.style.color = '#aaa';
+    }
   }
-  let sel = document.getElementById('mc-opt-' + idx);
-  if (sel) { sel.style.background='#e8503a'; sel.style.borderColor='#e8503a'; sel.style.color='#fff'; }
   window._chRef.answer = window._chOpts[idx];
   let fb = document.getElementById('ch-q-feedback-inline');
   fb.style.display = 'block';
-  fb.style.background = idx === window._chCorrect ? '#f0faf0' : '#fff8f0';
-  fb.style.color = idx === window._chCorrect ? '#2e7d52' : '#c0680a';
-  fb.textContent = window._chFeedback;
+  fb.style.background = idx === correct ? '#f0faf0' : '#fff0f0';
+  fb.style.color = idx === correct ? '#2e7d52' : '#c0392b';
+  fb.textContent = (idx === correct ? '✅ ' : '❌ ') + window._chFeedback;
   document.getElementById('ch-q-next-inline').style.display = 'block';
 }
 
