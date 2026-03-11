@@ -125,9 +125,6 @@ tr:nth-child(even) td { background:var(--light); }
 /* ── CANVAS AREA ── */
 .main { flex:1; display:flex; flex-direction:column; padding:20px; gap:12px; overflow:hidden; }
 #canvas-container canvas { border-radius:10px; box-shadow:0 15px 50px rgba(20,20,19,0.18); display:block; max-width:100%; }
-#ch-question-modal { pointer-events:auto !important; }
-#ch-question-modal * { pointer-events:auto !important; }
-body.modal-open #canvas-container canvas { pointer-events:none !important; }
 .loading { color:var(--mid); font-size:14px; padding:20px; }
 
 /* challenge banner */
@@ -309,6 +306,7 @@ body.modal-open #canvas-container canvas { pointer-events:none !important; }
     </div>
     <p style="font-size:11px;color:var(--mid);margin-bottom:10px;line-height:1.5;">Do each activity, then answer the question! 🎯</p>
     <div id="challenge-list"></div>
+    <div id="ch-inline-question" style="display:none;padding:0 4px 12px 4px;"></div>
   </div>
 
   <!-- ── DATA PANEL ── -->
@@ -1397,92 +1395,82 @@ function checkChallengeCompletion() {
   if (!ch.completed && ch.check()) {
     // Don't mark complete yet — show question first
     pendingChallengeIdx = activeChallengeIdx;
-    showChallengeQuestion(ch);
+    setTimeout(function(){ showChallengeQuestion(ALL_CHALLENGES[classLevel][pendingChallengeIdx]); }, 3000);
   }
 }
 
 function showChallengeQuestion(ch) {
-  let modal = document.getElementById('ch-question-modal');
-  let qtext = document.getElementById('ch-q-text');
-  let opts = document.getElementById('ch-q-options');
-  let feedback = document.getElementById('ch-q-feedback');
-  let nextBtn = document.getElementById('ch-q-next');
-  let label = document.getElementById('ch-q-label');
+  // Show question inside the sidebar challenge panel - no modal needed
+  switchMode('challenge');
+  let qDiv = document.getElementById('ch-inline-question');
+  if (!qDiv) return;
+  window._chOpts = ch.question.options || [];
+  window._chCorrect = ch.question.correct;
+  window._chFeedback = ch.question.feedback;
+  window._chRef = ch;
 
-  label.textContent = '🎉 Activity done! Now answer this:';
-  qtext.textContent = ch.question.text;
-  feedback.style.display = 'none';
-  nextBtn.style.display = 'none';
-  opts.innerHTML = '';
-
+  let optionsHTML = '';
   if (ch.question.type === 'mc') {
-    // Store options on window for inline onclick access
-    window._chOpts = ch.question.options;
-    window._chCorrect = ch.question.correct;
-    window._chFeedback = ch.question.feedback;
-    window._chRef = ch;
-    let html = '';
     ch.question.options.forEach((opt, i) => {
-      html += `<button onclick="selectMCAnswer(${i})" style="display:block;width:100%;text-align:left;padding:10px 12px;margin-bottom:8px;border-radius:10px;border:1.5px solid #ccc;background:#fff;font-size:13px;cursor:pointer;font-family:Poppins,sans-serif;color:#2d2d2d;" id="mc-opt-${i}">${opt}</button>`;
+      optionsHTML += `<button onclick="selectMCAnswer(${i})" id="mc-opt-${i}" style="display:block;width:100%;text-align:left;padding:10px 12px;margin-bottom:8px;border-radius:10px;border:2px solid #ddd;background:#fff;font-size:13px;cursor:pointer;font-family:Poppins,sans-serif;color:#2d2d2d;transition:all .15s;">${opt}</button>`;
     });
-    opts.innerHTML = html;
   } else {
-    // short answer
-    let ta = document.createElement('textarea');
-    ta.placeholder = 'Type your answer here...';
-    ta.style.cssText = 'width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--lgray);font-size:13px;font-family:Poppins,sans-serif;min-height:80px;box-sizing:border-box;resize:vertical;';
-    ta.oninput = () => {
-      ch.answer = ta.value;
-      if (ta.value.trim().length > 3) {
-        feedback.style.display = 'block';
-        feedback.style.background = '#f0faf0';
-        feedback.style.color = '#2e7d52';
-        feedback.textContent = ch.question.feedback;
-        nextBtn.style.display = 'block';
-      }
-    };
-    opts.appendChild(ta);
+    optionsHTML = `<textarea id="ch-short-ans" placeholder="Type your answer here..." oninput="handleShortAnswer(this)" style="width:100%;padding:10px;border-radius:10px;border:2px solid #ddd;font-size:13px;font-family:Poppins,sans-serif;min-height:80px;box-sizing:border-box;resize:vertical;"></textarea>`;
   }
 
-  modal.style.display = 'flex';
-  document.body.classList.add('modal-open');
+  qDiv.innerHTML = `
+    <div style="background:#fff8f0;border:2px solid #e8503a;border-radius:12px;padding:14px;margin-top:12px;">
+      <div style="font-size:12px;font-weight:700;color:#e8503a;margin-bottom:8px;">🎉 Activity done! Now answer this:</div>
+      <div style="font-size:13px;font-weight:600;color:#2d2d2d;margin-bottom:12px;line-height:1.5;">${ch.question.text}</div>
+      ${optionsHTML}
+      <div id="ch-q-feedback-inline" style="display:none;padding:10px;border-radius:8px;margin-top:8px;font-size:12px;font-weight:600;line-height:1.5;"></div>
+      <button id="ch-q-next-inline" onclick="submitChallengeAnswer()" style="display:none;margin-top:10px;width:100%;padding:10px;background:#2e7d52;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;">✅ Done! Next Challenge →</button>
+    </div>`;
+  qDiv.style.display = 'block';
+  qDiv.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+function handleShortAnswer(ta) {
+  window._chRef.answer = ta.value;
+  let fb = document.getElementById('ch-q-feedback-inline');
+  let nb = document.getElementById('ch-q-next-inline');
+  if (ta.value.trim().length > 5) {
+    fb.style.display = 'block';
+    fb.style.background = '#f0faf0';
+    fb.style.color = '#2e7d52';
+    fb.textContent = window._chFeedback;
+    nb.style.display = 'block';
+  }
 }
 
 function selectMCAnswer(idx) {
-  // Clear all buttons
   for (let i = 0; i < window._chOpts.length; i++) {
     let b = document.getElementById('mc-opt-' + i);
-    if (b) { b.style.background='#fff'; b.style.borderColor='#ccc'; b.style.color='#2d2d2d'; }
+    if (b) { b.style.background='#fff'; b.style.borderColor='#ddd'; b.style.color='#2d2d2d'; }
   }
-  // Highlight selected
   let sel = document.getElementById('mc-opt-' + idx);
   if (sel) { sel.style.background='#e8503a'; sel.style.borderColor='#e8503a'; sel.style.color='#fff'; }
-  // Store answer
   window._chRef.answer = window._chOpts[idx];
-  // Show feedback
-  let feedback = document.getElementById('ch-q-feedback');
-  feedback.style.display = 'block';
-  feedback.style.background = idx === window._chCorrect ? '#f0faf0' : '#fff8f0';
-  feedback.style.color = idx === window._chCorrect ? '#2e7d52' : '#c0680a';
-  feedback.textContent = window._chFeedback;
-  document.getElementById('ch-q-next').style.display = 'block';
+  let fb = document.getElementById('ch-q-feedback-inline');
+  fb.style.display = 'block';
+  fb.style.background = idx === window._chCorrect ? '#f0faf0' : '#fff8f0';
+  fb.style.color = idx === window._chCorrect ? '#2e7d52' : '#c0680a';
+  fb.textContent = window._chFeedback;
+  document.getElementById('ch-q-next-inline').style.display = 'block';
 }
 
 function submitChallengeAnswer() {
-  let modal = document.getElementById('ch-question-modal');
-  modal.style.display = 'none';
-  document.body.classList.remove('modal-open');
+  let qDiv = document.getElementById('ch-inline-question');
+  if (qDiv) qDiv.style.display = 'none';
   CHALLENGES = ALL_CHALLENGES[classLevel];
   let ch = CHALLENGES[pendingChallengeIdx];
   ch.completed = true;
   ch.completedAt = new Date().toLocaleTimeString();
-  // Flash success
   let f=document.getElementById('success-flash');
   f.textContent='🎉 Challenge Complete!';
   f.style.maxWidth='420px'; f.style.fontSize='13px'; f.style.lineHeight='1.6';
   f.classList.add('show');
   setTimeout(()=>f.classList.remove('show'),3000);
-  // Update banner
   document.getElementById('challenge-banner').className='show cb-complete';
   document.getElementById('cb-title').textContent='✅ Challenge Complete!';
   document.getElementById('cb-text').textContent='Great work! Pick the next challenge.';
@@ -1705,14 +1693,6 @@ window.addEventListener('load',()=>{
   setLevel('6');
 });
 </script>
-<div id="ch-question-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.55);z-index:99999;align-items:center;justify-content:center;">
-  <div style="background:#fff;border-radius:16px;padding:24px;max-width:420px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,0.25);position:relative;">
-    <div style="font-size:13px;font-weight:700;color:#e8503a;margin-bottom:6px;" id="ch-q-label">Challenge Question</div>
-    <div style="font-size:15px;font-weight:600;color:#2d2d2d;margin-bottom:14px;line-height:1.5;" id="ch-q-text"></div>
-    <div id="ch-q-options"></div>
-    <div id="ch-q-feedback" style="display:none;padding:10px;border-radius:8px;margin-top:10px;font-size:13px;font-weight:600;line-height:1.5;"></div>
-    <button id="ch-q-next" onclick="submitChallengeAnswer()" style="display:none;margin-top:12px;width:100%;padding:10px;background:#2e7d52;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">✅ Got it! Next →</button>
-  </div>
-</div>
+
 </body>
 </html>
