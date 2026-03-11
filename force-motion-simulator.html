@@ -306,7 +306,6 @@ tr:nth-child(even) td { background:var(--light); }
     </div>
     <p style="font-size:11px;color:var(--mid);margin-bottom:10px;line-height:1.5;">Do each activity, then answer the question! 🎯</p>
     <div id="challenge-list"></div>
-    <div id="ch-inline-question" style="display:none;padding:0 4px 12px 4px;"></div>
   </div>
 
   <!-- ── DATA PANEL ── -->
@@ -339,11 +338,12 @@ tr:nth-child(even) td { background:var(--light); }
 <!-- ═══ MAIN CANVAS ═══ -->
 <div class="main">
   <div id="challenge-banner">
-    <div class="cb-icon">🎯</div>
+    <div class="cb-icon" id="cb-icon">🎯</div>
     <div class="cb-body">
       <div class="cb-title" id="cb-title">Challenge Active</div>
       <div class="cb-text" id="cb-text"></div>
       <div class="cb-goal" id="cb-goal"></div>
+      <div id="ch-inline-question" style="display:none;margin-top:10px;"></div>
     </div>
   </div>
   <div id="canvas-container"><div class="loading">Initializing simulator…</div></div>
@@ -1400,10 +1400,8 @@ function checkChallengeCompletion() {
 }
 
 function showChallengeQuestion(ch) {
-  // Show question inside the sidebar challenge panel - no modal needed
-  switchMode('challenge');
   let qDiv = document.getElementById('ch-inline-question');
-  if (!qDiv) return;
+  if (!qDiv) { alert('DEBUG: ch-inline-question not found'); return; }
   window._chOpts = ch.question.options || [];
   window._chCorrect = ch.question.correct;
   window._chFeedback = ch.question.feedback;
@@ -1412,22 +1410,20 @@ function showChallengeQuestion(ch) {
   let optionsHTML = '';
   if (ch.question.type === 'mc') {
     ch.question.options.forEach((opt, i) => {
-      optionsHTML += `<button onclick="selectMCAnswer(${i})" id="mc-opt-${i}" style="display:block;width:100%;text-align:left;padding:10px 12px;margin-bottom:8px;border-radius:10px;border:2px solid #ddd;background:#fff;font-size:13px;cursor:pointer;font-family:Poppins,sans-serif;color:#2d2d2d;transition:all .15s;">${opt}</button>`;
+      optionsHTML += `<button onclick="window.selectMCAnswer(${i})" id="mc-opt-${i}" style="display:block;width:100%;text-align:left;padding:10px 14px;margin-bottom:8px;border-radius:10px;border:2px solid #ccc;background:white;font-size:13px;cursor:pointer;font-family:inherit;color:#222;font-weight:500;">${opt}</button>`;
     });
   } else {
-    optionsHTML = `<textarea id="ch-short-ans" placeholder="Type your answer here..." oninput="handleShortAnswer(this)" style="width:100%;padding:10px;border-radius:10px;border:2px solid #ddd;font-size:13px;font-family:Poppins,sans-serif;min-height:80px;box-sizing:border-box;resize:vertical;"></textarea>`;
+    optionsHTML = `<textarea id="ch-short-ans" placeholder="Type your answer here..." oninput="window.handleShortAnswer(this)" style="width:100%;padding:10px;border-radius:10px;border:2px solid #ccc;font-size:13px;font-family:inherit;min-height:70px;box-sizing:border-box;"></textarea>`;
   }
 
-  qDiv.innerHTML = `
-    <div style="background:#fff8f0;border:2px solid #e8503a;border-radius:12px;padding:14px;margin-top:12px;">
-      <div style="font-size:12px;font-weight:700;color:#e8503a;margin-bottom:8px;">🎉 Activity done! Now answer this:</div>
-      <div style="font-size:13px;font-weight:600;color:#2d2d2d;margin-bottom:12px;line-height:1.5;">${ch.question.text}</div>
-      ${optionsHTML}
-      <div id="ch-q-feedback-inline" style="display:none;padding:10px;border-radius:8px;margin-top:8px;font-size:12px;font-weight:600;line-height:1.5;"></div>
-      <button id="ch-q-next-inline" onclick="submitChallengeAnswer()" style="display:none;margin-top:10px;width:100%;padding:10px;background:#2e7d52;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;">✅ Done! Next Challenge →</button>
-    </div>`;
+  qDiv.innerHTML = `<div style="background:white;border-radius:12px;padding:14px;margin-top:10px;border:2px solid #e8503a;">
+    <div style="font-size:12px;font-weight:800;color:#e8503a;margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em;">🎉 Now answer this question:</div>
+    <div style="font-size:14px;font-weight:600;color:#1a1a2e;margin-bottom:12px;line-height:1.5;">${ch.question.text}</div>
+    ${optionsHTML}
+    <div id="ch-q-feedback-inline" style="display:none;padding:10px;border-radius:8px;margin-top:8px;font-size:13px;font-weight:600;line-height:1.5;"></div>
+    <button id="ch-q-next-inline" onclick="window.submitChallengeAnswer()" style="display:none;margin-top:10px;width:100%;padding:11px;background:#2e7d52;color:white;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">✅ Done! Next Challenge →</button>
+  </div>`;
   qDiv.style.display = 'block';
-  qDiv.scrollIntoView({behavior:'smooth', block:'nearest'});
 }
 
 function handleShortAnswer(ta) {
