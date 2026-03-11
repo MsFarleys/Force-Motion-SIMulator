@@ -1413,28 +1413,16 @@ function showChallengeQuestion(ch) {
   opts.innerHTML = '';
 
   if (ch.question.type === 'mc') {
+    // Store options on window for inline onclick access
+    window._chOpts = ch.question.options;
+    window._chCorrect = ch.question.correct;
+    window._chFeedback = ch.question.feedback;
+    window._chRef = ch;
+    let html = '';
     ch.question.options.forEach((opt, i) => {
-      let btn = document.createElement('button');
-      btn.textContent = opt;
-      btn.style.cssText = 'display:block;width:100%;text-align:left;padding:10px 12px;margin-bottom:8px;border-radius:10px;border:1.5px solid #ccc;background:#fff;font-size:13px;cursor:pointer;font-family:Poppins,sans-serif;color:#2d2d2d;';
-      (function(optText, optIdx) {
-        btn.addEventListener('click', function(e) {
-          e.stopPropagation();
-          // Clear selections
-          opts.querySelectorAll('button').forEach(b => {
-            b.style.background = '#fff'; b.style.borderColor = '#ccc'; b.style.color = '#2d2d2d';
-          });
-          this.style.background = '#e8503a'; this.style.borderColor = '#e8503a'; this.style.color = '#fff';
-          ch.answer = optText;
-          feedback.style.display = 'block';
-          feedback.style.background = optIdx===ch.question.correct ? '#f0faf0' : '#fff8f0';
-          feedback.style.color = optIdx===ch.question.correct ? '#2e7d52' : '#c0680a';
-          feedback.textContent = ch.question.feedback;
-          nextBtn.style.display = 'block';
-        });
-      })(opt, i);
-      opts.appendChild(btn);
+      html += `<button onclick="selectMCAnswer(${i})" style="display:block;width:100%;text-align:left;padding:10px 12px;margin-bottom:8px;border-radius:10px;border:1.5px solid #ccc;background:#fff;font-size:13px;cursor:pointer;font-family:Poppins,sans-serif;color:#2d2d2d;" id="mc-opt-${i}">${opt}</button>`;
     });
+    opts.innerHTML = html;
   } else {
     // short answer
     let ta = document.createElement('textarea');
@@ -1454,6 +1442,26 @@ function showChallengeQuestion(ch) {
   }
 
   modal.style.display = 'flex';
+}
+
+function selectMCAnswer(idx) {
+  // Clear all buttons
+  for (let i = 0; i < window._chOpts.length; i++) {
+    let b = document.getElementById('mc-opt-' + i);
+    if (b) { b.style.background='#fff'; b.style.borderColor='#ccc'; b.style.color='#2d2d2d'; }
+  }
+  // Highlight selected
+  let sel = document.getElementById('mc-opt-' + idx);
+  if (sel) { sel.style.background='#e8503a'; sel.style.borderColor='#e8503a'; sel.style.color='#fff'; }
+  // Store answer
+  window._chRef.answer = window._chOpts[idx];
+  // Show feedback
+  let feedback = document.getElementById('ch-q-feedback');
+  feedback.style.display = 'block';
+  feedback.style.background = idx === window._chCorrect ? '#f0faf0' : '#fff8f0';
+  feedback.style.color = idx === window._chCorrect ? '#2e7d52' : '#c0680a';
+  feedback.textContent = window._chFeedback;
+  document.getElementById('ch-q-next').style.display = 'block';
 }
 
 function submitChallengeAnswer() {
