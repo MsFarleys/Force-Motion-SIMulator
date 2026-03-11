@@ -269,7 +269,7 @@ tr:nth-child(even) td { background:var(--light); }
     <div class="div"></div>
     <div class="sec-head">Show on Screen</div>
     <div class="vis-btns">
-      <button class="btn blue-btn active" id="btn-vectors" onclick="toggleVectors()">Force Arrows</button>
+      <button class="btn blue-btn" id="btn-vectors" onclick="toggleVectors()">Force Arrows</button>
       <button class="btn blue-btn active" id="btn-trail" onclick="toggleTrail()">Motion Trail</button>
       <button class="btn blue-btn" id="btn-grid" onclick="toggleGrid()">Ruler Grid</button>
       <button class="btn blue-btn active" id="btn-labels" onclick="toggleLabels()">Labels</button>
@@ -367,7 +367,7 @@ tr:nth-child(even) td { background:var(--light); }
 // ═══════════════════════════════════════════════════════════
 const SCALE = 60, DT = 1/60;
 let scene = 'ramp', running = true, p5inst;
-let showVectors = true, showTrail = true, showGrid = false, showLabels = true;
+let showVectors = false, showTrail = true, showGrid = false, showLabels = true;
 let P = {}, sim = {};
 let dataRows = [];
 let quizState = { correct:0, total:0, current:null, answered:false };
@@ -1425,20 +1425,23 @@ function showChallengeQuestion(ch) {
     ch.question.options.forEach((opt, i) => {
       let btn = document.createElement('button');
       btn.textContent = opt;
-      btn.style.cssText = 'display:block;width:100%;text-align:left;padding:10px 12px;margin-bottom:8px;border-radius:10px;border:1.5px solid var(--lgray);background:#fff;font-size:13px;cursor:pointer;font-family:Poppins,sans-serif;';
-      btn.onclick = () => {
-        // Clear selections
-        opts.querySelectorAll('button').forEach(b => {
-          b.style.background = '#fff'; b.style.borderColor = 'var(--lgray)'; b.style.color = 'var(--dark)';
+      btn.style.cssText = 'display:block;width:100%;text-align:left;padding:10px 12px;margin-bottom:8px;border-radius:10px;border:1.5px solid #ccc;background:#fff;font-size:13px;cursor:pointer;font-family:Poppins,sans-serif;color:#2d2d2d;';
+      (function(optText, optIdx) {
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          // Clear selections
+          opts.querySelectorAll('button').forEach(b => {
+            b.style.background = '#fff'; b.style.borderColor = '#ccc'; b.style.color = '#2d2d2d';
+          });
+          this.style.background = '#e8503a'; this.style.borderColor = '#e8503a'; this.style.color = '#fff';
+          ch.answer = optText;
+          feedback.style.display = 'block';
+          feedback.style.background = optIdx===ch.question.correct ? '#f0faf0' : '#fff8f0';
+          feedback.style.color = optIdx===ch.question.correct ? '#2e7d52' : '#c0680a';
+          feedback.textContent = ch.question.feedback;
+          nextBtn.style.display = 'block';
         });
-        btn.style.background = 'var(--orange)'; btn.style.borderColor = 'var(--orange)'; btn.style.color = '#fff';
-        ch.answer = opt;
-        feedback.style.display = 'block';
-        feedback.style.background = i===ch.question.correct ? '#f0faf0' : '#fff8f0';
-        feedback.style.color = i===ch.question.correct ? '#2e7d52' : '#c0680a';
-        feedback.textContent = ch.question.feedback;
-        nextBtn.style.display = 'block';
-      };
+      })(opt, i);
       opts.appendChild(btn);
     });
   } else {
