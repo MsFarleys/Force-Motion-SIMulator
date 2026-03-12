@@ -620,8 +620,8 @@ const ALL_CHALLENGES = {
       check: ()=> scene==='collision' && sim.collided && dataRows.filter(r=>r.scene==='collision').length>=1,
       question: {
         type: 'short',
-        text: 'What happened to the two balls after they crashed into each other? Did the heavier ball or lighter ball move faster after the crash?',
-        feedback: '✅ The heavier ball kept moving and barely slowed down, while the lighter ball got pushed away fast. Heavier objects are harder to stop!'
+        text: 'What happened to the two balls after they crashed into each other? Now try changing the mass of one ball — what happens differently when one ball is heavier?',
+        feedback: '✅ When the balls are equal, they bounce off each other evenly. When one is heavier, it keeps moving and pushes the lighter ball away faster. Heavier objects are harder to stop!'
       }
     },
     {
