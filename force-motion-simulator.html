@@ -577,7 +577,7 @@ const ALL_CHALLENGES = {
       desc:'Turn on Force Arrows, then press Play and watch the box slide down the ramp. Look at each arrow — one shows gravity, one shows friction, one shows the net force.',
       goal:'✅ Turn on Force Arrows and watch the box slide all the way down.',
       hint:'💡 Hint: The orange arrow is gravity (down the ramp). The purple arrow is friction (up the ramp, opposing motion). The red arrow is the NET force.',
-      check: ()=> scene==='ramp' && showVectors && (sim.dist!==undefined) && sim.dist < ((p5inst.width*.75-36)/SCALE)*0.6,
+      check: ()=> scene==='ramp' && showVectors && sim.landed,
       question: {
         type: 'mc',
         text: 'The net force arrow points DOWN the ramp. What does that tell you about the forces?',
@@ -591,7 +591,7 @@ const ALL_CHALLENGES = {
       desc:'Try the ramp at 25°, watch the box, then try it at 55°. Watch the Speed readout — notice how much faster the box moves on the steeper ramp.',
       goal:'✅ Run the ramp at an angle below 30°, then run it above 50°. Compare the speeds.',
       hint:'💡 Hint: On a steeper ramp, gravity has a larger component along the slope. F = ma — more force means more acceleration!',
-      check: ()=> scene==='ramp' && P.angle>=50,
+      check: ()=> scene==='ramp' && P.angle>=50 && sim.landed,
       question: {
         type: 'short',
         text: 'Using F = ma, explain why a steeper ramp makes the box accelerate faster.',
@@ -603,7 +603,7 @@ const ALL_CHALLENGES = {
       desc:'Slowly increase the push force slider from 0. Notice the box stays still for a while (static friction). Keep going until it suddenly starts moving — that moment is when you overcame static friction!',
       goal:'✅ Observe the box staying still, then get it moving by overcoming static friction.',
       hint:'💡 Hint: Static friction (box still) is stronger than kinetic friction (box moving). Watch the force arrows — they balance until you apply enough force!',
-      check: ()=> scene==='friction' && (sim.vx||0)>0.1 && (sim.x||0)>0.3,
+      check: ()=> scene==='friction' && (sim.vx||0)>0.1 && (sim.x||0)>1.5,
       question: {
         type: 'mc',
         text: 'Why does it take more force to START the box moving than to KEEP it moving?',
@@ -627,9 +627,9 @@ const ALL_CHALLENGES = {
     {
       id:'c5', title:'🌍 Projectile Motion & Gravity', scene:'projectile', completed:false, completedAt:null, answer:null,
       desc:'Launch the ball and save the data. Then change the launch angle and launch again. Notice how the angle changes the path shape and landing distance.',
-      goal:'✅ Launch at two different angles and save both runs to the data table.',
+      goal:'✅ Launch at two different angles and SAVE both runs to the data table before the question appears.',
       hint:'💡 Hint: Horizontal motion is constant (no air resistance). Vertical motion is controlled entirely by gravity. The two are independent of each other!',
-      check: ()=> scene==='projectile' && sim.landed && dataRows.filter(r=>r.scene==='projectile').length>=1,
+      check: ()=> scene==='projectile' && sim.landed && dataRows.filter(r=>r.scene==='projectile').length>=2,
       question: {
         type: 'mc',
         text: 'While the ball is in the air, what is the only force acting on it (ignoring air resistance)?',
