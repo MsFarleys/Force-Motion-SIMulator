@@ -520,7 +520,7 @@ const ALL_CHALLENGES = {
       desc:'Look at the two balls. The orange ball will move RIGHT and the blue ball will move LEFT. Press Play and watch them crash into each other!',
       goal:'✅ Press Play and watch the two balls collide.',
       hint:'💡 Hint: Just press the Play button! Watch what happens when the two balls hit each other.',
-      check: ()=> scene==='collision' && sim.collided,
+      check: ()=> scene==='collision' && sim.collided && (sim.collidedFrames||0) >= 120,
       question: {
         type: 'mc',
         text: 'After the balls crashed, what happened to them?',
@@ -869,6 +869,7 @@ function updateFriction() {
 function updateCollision() {
   if (sim.collided) {
     if (sim.flashTimer>0) sim.flashTimer--;
+    if (sim.collided) sim.collidedFrames = (sim.collidedFrames||0) + 1;
     sim.x1+=sim.v1*DT; sim.x2+=sim.v2*DT; return;
   }
   sim.x1+=sim.v1*DT; sim.x2+=sim.v2*DT;
@@ -881,7 +882,7 @@ function updateCollision() {
     let e=P.elasticity,m1=P.mass1,m2=P.mass2,u1=sim.v1,u2=sim.v2;
     sim.v1=((m1-e*m2)*u1+(1+e)*m2*u2)/(m1+m2);
     sim.v2=((m2-e*m1)*u2+(1+e)*m1*u1)/(m1+m2);
-    sim.collided=true; sim.flashTimer=40;
+    sim.collided=true; sim.flashTimer=40; sim.collidedFrames=0;
   }
 }
 
