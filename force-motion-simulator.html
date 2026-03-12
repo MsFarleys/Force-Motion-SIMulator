@@ -478,7 +478,7 @@ const ALL_CHALLENGES = {
       desc:'Look at the ramp. The box is at the top! Find the button that says "Show Force Arrows" and turn it ON. You will see colored arrows appear on the box.',
       goal:'✅ Turn on Force Arrows, then press Play to watch the box slide down.',
       hint:'💡 Hint: Look for the "Show Force Arrows" button in the Explore panel. Click it so it turns ON.',
-      check: ()=> scene==='ramp' && showVectors,
+      check: ()=> scene==='ramp' && showVectors && sim.landed,
       question: {
         type: 'mc',
         text: 'You can see arrows on the box. What do you think the arrows show?',
@@ -492,7 +492,7 @@ const ALL_CHALLENGES = {
       desc:'Find the "Steepness of Ramp" slider. Drag it all the way to the right to make the ramp really steep. Then press Play and watch the box slide down.',
       goal:'✅ Move the angle slider past 60° and press Play to watch the box.',
       hint:'💡 Hint: The steepness slider is in the Explore panel. Drag it to the right — the number should go above 60.',
-      check: ()=> scene==='ramp' && P.angle>=60,
+      check: ()=> scene==='ramp' && P.angle>=60 && sim.landed,
       question: {
         type: 'mc',
         text: 'When you made the ramp steeper, what happened to the box?',
@@ -506,7 +506,7 @@ const ALL_CHALLENGES = {
       desc:'Find the "Your Push Force" slider. Start at 0 and slowly drag it to the right. At first nothing happens — keep going until the box starts sliding!',
       goal:'✅ Get the box moving by increasing the push force slider.',
       hint:'💡 Hint: The push force slider needs to be big enough to beat friction. Keep dragging it to the right until the box moves!',
-      check: ()=> scene==='friction' && (sim.vx||0)>0.1,
+      check: ()=> scene==='friction' && (sim.vx||0)<0.05 && (sim.x||0)>1.5,
       question: {
         type: 'mc',
         text: 'Why did the box stay still at first when you pushed?',
@@ -548,7 +548,7 @@ const ALL_CHALLENGES = {
       desc:'Find the "Surface Roughness" slider. First drag it all the way LEFT (very smooth, like ice). Press Play. Then reset and drag it all the way RIGHT (very rough). Press Play again.',
       goal:'✅ Try the smooth surface AND the rough surface — press Play for both.',
       hint:'💡 Hint: Try roughness near 0 first (smooth). Watch how far the box slides. Then try roughness near 0.7 (rough). Does it slide as far?',
-      check: ()=> scene==='friction' && P.muKinetic !== undefined,
+      check: ()=> scene==='friction' && (sim.x||0)>0.8 && (sim.vx||0)<0.01,
       question: {
         type: 'short',
         text: 'Which surface made the box slide farther — the smooth one or the rough one? Why do you think that is?',
@@ -617,7 +617,7 @@ const ALL_CHALLENGES = {
       desc:'Slowly increase the push force slider from 0. Notice the box stays still for a while (static friction). Keep going until it suddenly starts moving — that moment is when you overcame static friction!',
       goal:'✅ Observe the box staying still, then get it moving by overcoming static friction.',
       hint:'💡 Hint: Static friction (box still) is stronger than kinetic friction (box moving). Watch the force arrows — they balance until you apply enough force!',
-      check: ()=> scene==='friction' && (sim.vx||0)>0.1 && (sim.x||0)>1.5,
+      check: ()=> scene==='friction' && (sim.vx||0)<0.05 && (sim.x||0)>1.5,
       question: {
         type: 'mc',
         text: 'Why does it take more force to START the box moving than to KEEP it moving?',
@@ -805,7 +805,7 @@ function initSim(resetP) {
   }
   else if (scene==='projectile') sim={ launched:false, trail:[], landed:false, range:0, maxH:0, sx:0, sy:0, vx_m:0, vy_m:0 };
   else if (scene==='friction')   sim={ x:0, vx:0, trail:[] };
-  else if (scene==='collision')  sim={ x1:0, v1:P.vel1, x2:0, v2:P.vel2, collided:false, trail1:[], trail2:[], flashTimer:0 };
+  else if (scene==='collision')  sim={ x1:0, v1:P.vel1, x2:0, v2:P.vel2, collided:false, trail1:[], trail2:[], flashTimer:0, collidedFrames:0 };
 }
 
 function updatePhysics() {
@@ -1267,6 +1267,10 @@ function setScene(s) {
 function resetSim() {
   running=true;
   document.getElementById('btn-play').textContent='⏸ Pause';
+  // Clear any pending question
+  let qDiv = document.getElementById('ch-inline-question');
+  if (qDiv) qDiv.style.display = 'none';
+  pendingChallengeIdx = -1;
   initSim(false);
 }
 
@@ -1400,9 +1404,12 @@ function renderChallenges() {
 
 function selectChallenge(i) {
   activeChallengeIdx=i;
+  pendingChallengeIdx=-1; // reset pending so fresh start
   let ch=CHALLENGES[i];
   // Switch to the right scene
   if (scene!==ch.scene) setScene(ch.scene);
+  // Reset sim so stale collided/landed flags don't instantly trigger
+  initSim(true);
   // Show banner
   let banner=document.getElementById('challenge-banner');
   banner.className='show';
