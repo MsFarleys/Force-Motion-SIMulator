@@ -1406,6 +1406,7 @@ function showChallengeQuestion(ch) {
   window._chCorrect = ch.question.correct;
   window._chFeedback = ch.question.feedback;
   window._chRef = ch;
+  window._chAnswered = false;
 
   let optionsHTML = '';
   if (ch.question.type === 'mc') {
@@ -1440,19 +1441,19 @@ function handleShortAnswer(ta) {
 }
 
 function selectMCAnswer(idx) {
+  if (window._chAnswered) return; // locked — can't change answer
+  window._chAnswered = true;
   let correct = window._chCorrect;
   let isCorrect = (idx === correct);
   for (let i = 0; i < window._chOpts.length; i++) {
     let b = document.getElementById('mc-opt-' + i);
     if (!b) continue;
+    b.style.cursor = 'default'; // show it's locked
     if (i === idx && isCorrect) {
-      // Clicked the right answer — green
       b.style.background = '#2e7d52'; b.style.borderColor = '#2e7d52'; b.style.color = '#fff';
     } else if (i === idx && !isCorrect) {
-      // Clicked wrong answer — red
       b.style.background = '#c0392b'; b.style.borderColor = '#c0392b'; b.style.color = '#fff';
     } else if (i === correct && !isCorrect) {
-      // Show the correct answer in green only if student got it wrong
       b.style.background = '#2e7d52'; b.style.borderColor = '#2e7d52'; b.style.color = '#fff';
     } else {
       b.style.background = '#fff'; b.style.borderColor = '#ddd'; b.style.color = '#aaa';
@@ -1463,7 +1464,11 @@ function selectMCAnswer(idx) {
   fb.style.display = 'block';
   fb.style.background = idx === correct ? '#f0faf0' : '#fff0f0';
   fb.style.color = idx === correct ? '#2e7d52' : '#c0392b';
-  fb.textContent = (idx === correct ? '✅ ' : '❌ ') + window._chFeedback;
+  if (idx === correct) {
+    fb.textContent = '✅ ' + window._chFeedback;
+  } else {
+    fb.textContent = '❌ Not quite! The correct answer is highlighted in green above.';
+  }
   document.getElementById('ch-q-next-inline').style.display = 'block';
 }
 
