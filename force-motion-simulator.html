@@ -1431,6 +1431,7 @@ function showChallengeQuestion(ch) {
   if (!qDiv) { alert('DEBUG: ch-inline-question not found'); return; }
   window._chOpts = ch.question.options || [];
   window._chCorrect = ch.question.correct;
+  window._chCorrectText = ch.question.options ? ch.question.options[ch.question.correct] : null;
   window._chFeedback = ch.question.feedback;
   window._chRef = ch;
   window._chAnswered = false;
@@ -1508,7 +1509,7 @@ function submitChallengeAnswer() {
   ch.completedAt = new Date().toLocaleTimeString();
   // Track if they got it right
   if (ch.question.type === 'mc') {
-    ch.correct = (window._chAnswered && window._chRef && window._chRef.answer === window._chOpts[window._chCorrect]);
+    ch.correct = (window._chCorrectText && ch.answer === window._chCorrectText);
   } else {
     ch.correct = true; // short answer always counts as correct if submitted
   }
