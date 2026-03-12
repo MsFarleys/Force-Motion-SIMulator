@@ -801,7 +801,7 @@ function initSim(resetP) {
   if (scene==='ramp') {
     // dist starts at ramp length so box appears at TOP and slides DOWN
     let rLen = p5inst ? (p5inst.width*.75-36)/SCALE : 8;
-    sim={ v:0, dist:rLen, trail:[], _step:0 };
+    sim={ v:0, dist:rLen, trail:[], _step:0, reachedBottom:false };
   }
   else if (scene==='projectile') sim={ launched:false, trail:[], landed:false, range:0, maxH:0, sx:0, sy:0, vx_m:0, vy_m:0 };
   else if (scene==='friction')   sim={ x:0, vx:0, trail:[] };
@@ -825,7 +825,12 @@ function updateRamp() {
   if (Fnet>0.001) {
     sim.v=(sim.v||0)+acc*DT;
     sim.dist-=sim.v*DT;          // count DOWN toward bottom
-    if (sim.dist<=0){sim.dist=rMax;sim.v=0;sim.trail=[];sim.reachedBottom=true;} // reset: back to top
+    if (sim.dist<=0){
+      sim.dist=0; sim.v=0;
+      sim.reachedBottom=true;
+      running=false;
+      document.getElementById('btn-play').textContent='▶ Play';
+    } // pause at bottom
     sim.trail.push(sim.dist*SCALE);
     if (sim.trail.length>300) sim.trail.shift();
   } else { sim.v=0; }
