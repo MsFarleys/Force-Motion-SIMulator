@@ -478,7 +478,7 @@ const ALL_CHALLENGES = {
       desc:'Look at the ramp. The box is at the top! Find the button that says "Show Force Arrows" and turn it ON. You will see colored arrows appear on the box.',
       goal:'✅ Turn on Force Arrows, then press Play to watch the box slide down.',
       hint:'💡 Hint: Look for the "Show Force Arrows" button in the Explore panel. Click it so it turns ON.',
-      check: ()=> scene==='ramp' && showVectors && sim.landed,
+      check: ()=> scene==='ramp' && showVectors && sim.reachedBottom,
       question: {
         type: 'mc',
         text: 'You can see arrows on the box. What do you think the arrows show?',
@@ -492,7 +492,7 @@ const ALL_CHALLENGES = {
       desc:'Find the "Steepness of Ramp" slider. Drag it all the way to the right to make the ramp really steep. Then press Play and watch the box slide down.',
       goal:'✅ Move the angle slider past 60° and press Play to watch the box.',
       hint:'💡 Hint: The steepness slider is in the Explore panel. Drag it to the right — the number should go above 60.',
-      check: ()=> scene==='ramp' && P.angle>=60 && sim.landed,
+      check: ()=> scene==='ramp' && P.angle>=60 && sim.reachedBottom,
       question: {
         type: 'mc',
         text: 'When you made the ramp steeper, what happened to the box?',
@@ -591,7 +591,7 @@ const ALL_CHALLENGES = {
       desc:'Turn on Force Arrows, then press Play and watch the box slide down the ramp. Look at each arrow — one shows gravity, one shows friction, one shows the net force.',
       goal:'✅ Turn on Force Arrows and watch the box slide all the way down.',
       hint:'💡 Hint: The orange arrow is gravity (down the ramp). The purple arrow is friction (up the ramp, opposing motion). The red arrow is the NET force.',
-      check: ()=> scene==='ramp' && showVectors && sim.landed,
+      check: ()=> scene==='ramp' && showVectors && sim.reachedBottom,
       question: {
         type: 'mc',
         text: 'The net force arrow points DOWN the ramp. What does that tell you about the forces?',
@@ -605,7 +605,7 @@ const ALL_CHALLENGES = {
       desc:'Try the ramp at 25°, watch the box, then try it at 55°. Watch the Speed readout — notice how much faster the box moves on the steeper ramp.',
       goal:'✅ Run the ramp at an angle below 30°, then run it above 50°. Compare the speeds.',
       hint:'💡 Hint: On a steeper ramp, gravity has a larger component along the slope. F = ma — more force means more acceleration!',
-      check: ()=> scene==='ramp' && P.angle>=50 && sim.landed,
+      check: ()=> scene==='ramp' && P.angle>=50 && sim.reachedBottom,
       question: {
         type: 'short',
         text: 'When you made the ramp steeper, what happened to the speed of the box? Why do you think that happened?',
@@ -825,7 +825,7 @@ function updateRamp() {
   if (Fnet>0.001) {
     sim.v=(sim.v||0)+acc*DT;
     sim.dist-=sim.v*DT;          // count DOWN toward bottom
-    if (sim.dist<=0){sim.dist=rMax;sim.v=0;sim.trail=[];} // reset: back to top
+    if (sim.dist<=0){sim.dist=rMax;sim.v=0;sim.trail=[];sim.reachedBottom=true;} // reset: back to top
     sim.trail.push(sim.dist*SCALE);
     if (sim.trail.length>300) sim.trail.shift();
   } else { sim.v=0; }
