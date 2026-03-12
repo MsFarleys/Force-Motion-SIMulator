@@ -285,7 +285,7 @@ tr:nth-child(even) td { background:var(--light); }
       <button class="btn btn-full" onclick="stepSim()">→ Step One Frame</button>
     </div>
     <div class="btn-row">
-      <button class="btn green-btn btn-full" onclick="logDataRow()">📊 Save to Data Table</button>
+      <button class="btn btn-full" onclick="logDataRow()" style="background:#00c853;color:#fff;border-color:#00c853;font-weight:800;font-size:13px;">📊 Save to Data Table</button>
     </div>
 
     <div id="law-card" class="law-card">
@@ -614,9 +614,9 @@ const ALL_CHALLENGES = {
     },
     {
       id:'c4', title:'💥 Conservation of Momentum', scene:'collision', completed:false, completedAt:null, answer:null,
-      desc:'Watch the collision. Press Play, then save the data. Now change the mass of one ball (use the sliders) and watch again. How does changing mass affect what happens after the collision?',
-      goal:'✅ Watch a collision, save data, then change a mass and watch again.',
-      hint:'💡 Hint: momentum = mass × velocity. In a collision, total momentum is conserved. A heavier ball has more momentum — watch what happens to the lighter one!',
+      desc:'Press Play and watch the balls crash. Then click 📊 Save to Data Table in the Explore tab. Now change the mass of one ball using the sliders and watch again!',
+      goal:'✅ Watch a collision, then click Save to Data Table. Then change a mass and watch again.',
+      hint:'💡 Hint: The Save to Data Table button is at the bottom of the left panel in the Explore tab. Save after the balls collide!',
       check: ()=> scene==='collision' && sim.collided && dataRows.filter(r=>r.scene==='collision').length>=1,
       question: {
         type: 'short',
@@ -626,9 +626,9 @@ const ALL_CHALLENGES = {
     },
     {
       id:'c5', title:'🌍 Projectile Motion & Gravity', scene:'projectile', completed:false, completedAt:null, answer:null,
-      desc:'Launch the ball and save the data. Then change the launch angle and launch again. Notice how the angle changes the path shape and landing distance.',
-      goal:'✅ Launch at two different angles and SAVE both runs to the data table before the question appears.',
-      hint:'💡 Hint: Horizontal motion is constant (no air resistance). Vertical motion is controlled entirely by gravity. The two are independent of each other!',
+      desc:'Launch the ball and watch it land. Then click 📊 Save to Data Table (in the Explore tab). Change the launch angle and launch again. Click Save again. You need 2 saves!',
+      goal:'✅ Launch the ball, let it land, then click Save to Data Table. Do this TWICE with different angles.',
+      hint:'💡 Hint: The Save to Data Table button is at the bottom of the left panel. After saving, reset and try a different angle, then save again!',
       check: ()=> scene==='projectile' && sim.landed && dataRows.filter(r=>r.scene==='projectile').length>=2,
       question: {
         type: 'mc',
@@ -640,9 +640,9 @@ const ALL_CHALLENGES = {
     },
     {
       id:'c6', title:'🧊 Friction Investigation', scene:'friction', completed:false, completedAt:null, answer:null,
-      desc:'Run 3 trials: LOW roughness (~0.1), MEDIUM roughness (~0.35), HIGH roughness (~0.65). Save each one. Look at your data — how does friction affect distance traveled?',
-      goal:'✅ Save 3 friction runs with different roughness values to the Data Table.',
-      hint:'💡 Hint: Use the Surface Roughness slider. After each run, save before resetting. Check the Data tab to compare how far the box went each time.',
+      desc:'Set roughness LOW (~0.1), press Play, let it stop, then click 📊 Save to Data Table. Reset. Try MEDIUM (~0.35) and save. Try HIGH (~0.65) and save. That is 3 saves total!',
+      goal:'✅ Click Save to Data Table 3 times — once for each roughness level.',
+      hint:'💡 Hint: Save to Data Table button is at the bottom of the left panel. Do LOW, then MEDIUM, then HIGH roughness. Save after each one before pressing Reset!',
       check: ()=> {
         let fRows = dataRows.filter(r=>r.scene==='friction');
         return fRows.length >= 3;
@@ -655,9 +655,9 @@ const ALL_CHALLENGES = {
     },
     {
       id:'c7', title:'📊 Ramp Data Analysis', scene:'ramp', completed:false, completedAt:null, answer:null,
-      desc:'Save ramp data at 3 different angles (try 20°, 40°, and 60°). Go to the Data tab and look at the speed values. What pattern do you see?',
-      goal:'✅ Save 3 ramp runs at 3 different angles.',
-      hint:'💡 Hint: Press Reset between each trial. Adjust angle, press Play, let it run a few seconds, then save. Check your Data tab after all 3!',
+      desc:'Set the angle to 20°, press Play, then click 📊 Save to Data Table. Reset. Try 40° and save. Try 60° and save. You need 3 saves at 3 different angles!',
+      goal:'✅ Click Save to Data Table 3 times — once at 20°, once at 40°, once at 60°.',
+      hint:'💡 Hint: Save to Data Table button is at the bottom of the left panel. Press Reset between each trial, change the angle, press Play, then Save!',
       check: ()=> {
         let rRows = dataRows.filter(r=>r.scene==='ramp');
         return [...new Set(rRows.map(r=>r.data[0]))].length >= 3;
