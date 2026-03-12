@@ -98,9 +98,9 @@ input[type=range]::-moz-range-thumb { width:14px; height:14px; background:var(--
 
 /* ── DATA TABLE ── */
 .data-table-wrap { overflow-x:auto; margin-top:8px; }
-table { width:100%; border-collapse:collapse; font-size:11px; }
-th { background:var(--dark); color:#fff; padding:7px 8px; text-align:left; font-weight:600; font-size:10px; text-transform:uppercase; letter-spacing:.04em; }
-td { padding:6px 8px; border-bottom:1px solid var(--lgray); color:var(--dark); }
+table { width:100%; border-collapse:collapse; font-size:13px; }
+th { background:var(--dark); color:#fff; padding:8px 10px; text-align:left; font-weight:700; font-size:12px; text-transform:uppercase; letter-spacing:.04em; }
+td { padding:7px 10px; border-bottom:1px solid var(--lgray); color:#111; font-size:13px; font-weight:500; }
 tr:nth-child(even) td { background:var(--light); }
 .no-data { color:var(--mid); font-size:12px; text-align:center; padding:20px; font-style:italic; }
 
@@ -506,7 +506,7 @@ const ALL_CHALLENGES = {
       desc:'Find the "Your Push Force" slider. Start at 0 and slowly drag it to the right. At first nothing happens — keep going until the box starts sliding!',
       goal:'✅ Get the box moving by increasing the push force slider.',
       hint:'💡 Hint: The push force slider needs to be big enough to beat friction. Keep dragging it to the right until the box moves!',
-      check: ()=> scene==='friction' && (sim.vx||0)<0.05 && (sim.x||0)>1.5,
+      check: ()=> scene==='friction' && (sim.vx||0)>0.05 && (sim.x||0)>0.3,
       question: {
         type: 'mc',
         text: 'Why did the box stay still at first when you pushed?',
@@ -548,7 +548,7 @@ const ALL_CHALLENGES = {
       desc:'Find the "Surface Roughness" slider. First drag it all the way LEFT (very smooth, like ice). Press Play. Then reset and drag it all the way RIGHT (very rough). Press Play again.',
       goal:'✅ Try the smooth surface AND the rough surface — press Play for both.',
       hint:'💡 Hint: Try roughness near 0 first (smooth). Watch how far the box slides. Then try roughness near 0.7 (rough). Does it slide as far?',
-      check: ()=> scene==='friction' && (sim.x||0)>0.8 && (sim.vx||0)<0.01,
+      check: ()=> scene==='friction' && (sim.x||0)>0.8 && (sim.vx||0)>0.01,
       question: {
         type: 'short',
         text: 'Which surface made the box slide farther — the smooth one or the rough one? Why do you think that is?',
@@ -617,7 +617,7 @@ const ALL_CHALLENGES = {
       desc:'Slowly increase the push force slider from 0. Notice the box stays still for a while (static friction). Keep going until it suddenly starts moving — that moment is when you overcame static friction!',
       goal:'✅ Observe the box staying still, then get it moving by overcoming static friction.',
       hint:'💡 Hint: Static friction (box still) is stronger than kinetic friction (box moving). Watch the force arrows — they balance until you apply enough force!',
-      check: ()=> scene==='friction' && (sim.vx||0)<0.05 && (sim.x||0)>1.5,
+      check: ()=> scene==='friction' && (sim.vx||0)>0.05 && (sim.x||0)>0.3,
       question: {
         type: 'mc',
         text: 'Why does it take more force to START the box moving than to KEEP it moving?',
