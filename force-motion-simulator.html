@@ -278,7 +278,7 @@ tr:nth-child(even) td { background:var(--light); }
     <div class="div"></div>
     <div class="sec-head">Playback</div>
     <div class="btn-row">
-      <button class="btn" id="btn-play" onclick="togglePlay()">⏸ Pause</button>
+      <button class="btn" id="btn-play" onclick="togglePlay()" style="background:#f5a623;color:#fff;border-color:#f5a623;font-weight:800;">⏸ Pause</button>
       <button class="btn" onclick="resetSim()">↺ Reset</button>
     </div>
     <div class="btn-row">
@@ -1390,11 +1390,11 @@ function selectChallenge(i) {
 
 function checkChallengeCompletion() {
   if (activeChallengeIdx<0) return;
+  if (pendingChallengeIdx>=0) return; // already waiting, don't fire again
   CHALLENGES = ALL_CHALLENGES[classLevel];
   let ch=CHALLENGES[activeChallengeIdx];
   if (!ch.completed && ch.check()) {
-    // Don't mark complete yet — show question first
-    pendingChallengeIdx = activeChallengeIdx;
+    pendingChallengeIdx = activeChallengeIdx; // set immediately so this only fires once
     setTimeout(function(){ showChallengeQuestion(ALL_CHALLENGES[classLevel][pendingChallengeIdx]); }, 3000);
   }
 }
