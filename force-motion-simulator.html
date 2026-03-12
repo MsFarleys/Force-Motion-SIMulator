@@ -594,8 +594,8 @@ const ALL_CHALLENGES = {
       check: ()=> scene==='ramp' && P.angle>=50 && sim.landed,
       question: {
         type: 'short',
-        text: 'Using F = ma, explain why a steeper ramp makes the box accelerate faster.',
-        feedback: '✅ On a steeper ramp, the component of gravity along the slope is larger. That means more net force. Since F = ma and mass stays the same, more force = more acceleration!'
+        text: 'When you made the ramp steeper, what happened to the speed of the box? Why do you think that happened?',
+        feedback: '✅ The box moved faster on the steeper ramp! A steeper ramp means gravity is pulling harder along the slope, so the box speeds up more quickly.'
       }
     },
     {
@@ -620,8 +620,8 @@ const ALL_CHALLENGES = {
       check: ()=> scene==='collision' && sim.collided && dataRows.filter(r=>r.scene==='collision').length>=1,
       question: {
         type: 'short',
-        text: 'What happened when you made one ball much heavier than the other? Describe how their motion changed after the collision.',
-        feedback: '✅ The heavier ball barely slows down while the lighter ball bounces away fast. This shows conservation of momentum — the heavier ball has more momentum and transfers force to the lighter one.'
+        text: 'What happened to the two balls after they crashed into each other? Did the heavier ball or lighter ball move faster after the crash?',
+        feedback: '✅ The heavier ball kept moving and barely slowed down, while the lighter ball got pushed away fast. Heavier objects are harder to stop!'
       }
     },
     {
@@ -649,8 +649,8 @@ const ALL_CHALLENGES = {
       },
       question: {
         type: 'short',
-        text: 'Based on your 3 data points, describe the relationship between surface roughness and how far the box travels.',
-        feedback: '✅ As roughness increases, friction increases, which does more negative work on the box — removing kinetic energy faster and causing it to stop sooner. Inverse relationship!'
+        text: 'Look at your 3 trials. When the surface was rougher, did the box travel farther or not as far? What does that tell you about friction?',
+        feedback: '✅ The rougher the surface, the shorter the distance! More roughness means more friction, and friction slows the box down and stops it sooner.'
       }
     },
     {
@@ -664,8 +664,8 @@ const ALL_CHALLENGES = {
       },
       question: {
         type: 'short',
-        text: 'Look at your data table. As angle increases, what happens to speed? Write a claim using evidence from your data.',
-        feedback: '✅ As the ramp angle increases, speed increases. Evidence: higher angle trials show higher speed values. Claim: Steeper ramps produce greater acceleration because gravity\'s component along the slope increases.'
+        text: 'Look at your data table. Write a claim: When the angle gets bigger, the speed gets... (higher or lower?). Then give one piece of evidence from your data table to back it up.',
+        feedback: '✅ Great claim writing! Example: "When the angle gets bigger, the speed gets higher. I know this because my data shows that the 60° trial had a faster speed than the 20° trial."'
       }
     },
     {
