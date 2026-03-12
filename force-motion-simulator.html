@@ -1506,6 +1506,12 @@ function submitChallengeAnswer() {
   let ch = CHALLENGES[pendingChallengeIdx];
   ch.completed = true;
   ch.completedAt = new Date().toLocaleTimeString();
+  // Track if they got it right
+  if (ch.question.type === 'mc') {
+    ch.correct = (window._chAnswered && window._chRef && window._chRef.answer === window._chOpts[window._chCorrect]);
+  } else {
+    ch.correct = true; // short answer always counts as correct if submitted
+  }
   let f=document.getElementById('success-flash');
   f.textContent='🎉 Challenge Complete!';
   f.style.maxWidth='420px'; f.style.fontSize='13px'; f.style.lineHeight='1.6';
@@ -1646,7 +1652,7 @@ function submitToSheets() {
 
   // One column per challenge: ✅/❌ + answer
   CHALLENGES.forEach((ch, i) => {
-    payload['c' + (i+1) + '_' + ch.title.replace(/[^a-zA-Z0-9]/g,' ').trim().substring(0,20)] = ch.completed ? '✅' : '❌';
+    payload['c' + (i+1) + '_' + ch.title.replace(/[^a-zA-Z0-9]/g,' ').trim().substring(0,20)] = !ch.completed ? '❌' : (ch.correct ? '✅' : '⚠️ Wrong');
     if (ch.answer) payload['c' + (i+1) + '_answer'] = ch.answer;
   });
 
